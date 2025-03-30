@@ -1,0 +1,22 @@
+# Ignore virtual environments
+venv*/
+__pycache__/
+*.pyc
+
+# Ignore third-party or generated directories
+annoy/
+RapidFuzz/
+
+# Ignore model and data files
+Data/
+Files/
+Models/
+
+# Ignore backup or temp files
+*.pkl
+*.txt
+*.ttf
+*.bat
+
+# Allow only requirements.txt
+!requirements.txt

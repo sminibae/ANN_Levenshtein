@@ -1,0 +1,19 @@
+jupyter
+pandas
+numpy
+
+scipy
+# scikit-learn
+# statsmodels
+
+matplotlib
+seaborn
+
+# openpyxl
+pyarrow
+# imageio
+
+joblib
+
+annoy
+rapidfuzz
