@@ -2,18 +2,15 @@ jupyter
 pandas
 numpy
 
+annoy
+rapidfuzz
+
 scipy
 # scikit-learn
-# statsmodels
 
 matplotlib
 seaborn
 
-# openpyxl
 pyarrow
-# imageio
-
 joblib
-
-annoy
-rapidfuzz
+dill
