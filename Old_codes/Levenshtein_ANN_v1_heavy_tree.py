@@ -14,6 +14,18 @@ from .ANN_Levenshtein.Template import TreeTemplate, IndexTemplate, ForestTemplat
 class LevenshteinTree(TreeTemplate):
     def __init__(self, num_strings, split_num, depth, s1_idx=None, s2_idx=None, tf_array=None, weights=(1,1,1)):
         super().__init__(num_strings, split_num, depth, s1_idx, s2_idx, tf_array)
+        self.num_strings = num_strings
+        self.split_num = split_num
+        self.depth = depth
+        self.s1_idx = s1_idx
+        self.s2_idx = s2_idx
+        self.left = None
+        self.right = None
+
+        if tf_array is None and depth == 0:
+            self.tf_array = np.zeros((num_strings, split_num), dtype=bool)
+        else:
+            self.tf_array = tf_array
         self.weights = weights
 
     # Hangul Decomposition function using unicodedata

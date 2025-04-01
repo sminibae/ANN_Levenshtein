@@ -49,7 +49,6 @@ class IndexTemplate(ABC):
     def save(self, filename: str):
         pass
 
-    @staticmethod
     @abstractmethod
     def load(filename: str):
         pass

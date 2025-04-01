@@ -1,2 +1,2 @@
-from .Template import TreeTemplate, IndexTemplate, ForestTemplate
-from .Levenshtein_ANN import LevenshteinTree, LevenshteinIndex, LevenshteinForest
+from .Template import NodeTemplate, TreeTemplate, IndexTemplate, ForestTemplate
+from .Levenshtein_ANN import LevenshteinIndex
