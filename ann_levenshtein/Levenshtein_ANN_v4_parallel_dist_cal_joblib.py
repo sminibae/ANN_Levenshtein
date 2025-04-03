@@ -6,7 +6,7 @@ import random
 import unicodedata
 
 from rapidfuzz.distance import Levenshtein
-from ..ann_levenshtein.Template import IndexTemplate
+from .Template import IndexTemplate
 
 from joblib import Parallel, delayed
 
@@ -45,12 +45,10 @@ class LevenshteinIndex(IndexTemplate):
                 decomposed += char
         return decomposed
     
-
-    def _compute_distance_decision(self, idx, s1_idx, s2_idx):
-        strings = self._string_buffer
-
-        d1 = Levenshtein.distance(strings[idx], strings[s1_idx])
-        d2 = Levenshtein.distance(strings[idx], strings[s2_idx])
+    @staticmethod
+    def _compute_distance_decision(x, s1, s2):
+        d1 = Levenshtein.distance(x, s1)
+        d2 = Levenshtein.distance(x, s2)
         return d1 <= d2
 
 
@@ -89,13 +87,15 @@ class LevenshteinIndex(IndexTemplate):
             for _ in range(max_attempts):
                 # Choose s1 and s2
                 s1_idx, s2_idx = np.random.choice(indices, 2, replace=False)
-                if strings[s1_idx] == strings[s2_idx]:
+                s1 = strings[s1_idx]
+                s2 = strings[s2_idx]
+                if s1 == s2:
                     continue
 
                 # Compute Levenshtein distance
                 mask = np.array(
                     Parallel(n_jobs=self.n_jobs)(
-                        delayed(self._compute_distance_decision)(idx, s1_idx, s2_idx)
+                        delayed(self._compute_distance_decision)(strings[idx], s1, s2)
                         for idx in indices
                     ),
                     dtype=bool
