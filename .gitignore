@@ -18,6 +18,8 @@ Models/
 *.txt
 *.ttf
 *.bat
+*.npz
+*.npy
 
 # Allow only requirements.txt
 !requirements.txt

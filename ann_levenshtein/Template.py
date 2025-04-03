@@ -15,10 +15,8 @@ class NodeTemplate(ABC):
 
 
 class IndexTemplate(ABC):
-    def __init__(self, num_trees, num_strings, split_num):
+    def __init__(self, num_trees):
         self.num_trees = num_trees
-        self.num_strings = num_strings
-        self.split_num = split_num
         self.trees = []
 
     @abstractmethod
