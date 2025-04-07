@@ -4,6 +4,7 @@ numpy
 
 annoy
 rapidfuzz
+tqdm
 
 scipy
 # scikit-learn

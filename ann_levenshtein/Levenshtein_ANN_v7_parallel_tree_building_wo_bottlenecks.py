@@ -5,11 +5,13 @@ import pandas as pd
 import random
 import unicodedata
 
-from rapidfuzz.distance import Levenshtein
+from rapidfuzz.distance.Levenshtein import distance as dist
+from rapidfuzz.process import cdist
 from .Template import IndexTemplate
 
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor
-from tqdm import tqdm
+# from tqdm import tqdm
 
 
 class LevenshteinIndex(IndexTemplate):
@@ -61,24 +63,25 @@ class LevenshteinIndex(IndexTemplate):
         leaf_value = np.full(shape=estimated_nodes, fill_value=-1, dtype=np.int32)
 
         # queue
-        queue = [(0, np.arange(len(self._string_buffer)))]  # (idx, indices)
+        queue = deque()
+        queue.append((0, np.arange(len(self._string_buffer))))  # (idx, indices)
         node_counter = 1
 
         # attempts
         max_attempts = 5
 
         # progress bar for queue
-        pbar_queue = tqdm(total=estimated_nodes, position=tree_id*3, desc=f"Tree {tree_id} queue", leave=False)
+        # pbar_queue = tqdm(total=estimated_nodes, position=tree_id*3, desc=f"Tree {tree_id} queue", leave=False)
         # progress bar for total calculations
-        distance_counter = 0
-        pbar_total_dists = tqdm(total=0, position=tree_id*3+1,  bar_format='{desc}: {n_fmt}', desc=f"Tree {tree_id} total dists", leave=False, unit_scale=True)
+        # distance_counter = 0
+        # pbar_total_dists = tqdm(total=0, position=tree_id,  bar_format='{desc}: {n_fmt}', desc=f"Tree {tree_id} total dists", leave=False, unit_scale=True)
 
         while queue:
-            current_node_id, indices = queue.pop(0)
+            current_node_id, indices = queue.popleft()  # O(1)
 
             # update pbar
-            pbar_queue.update(1)
-            pbar_queue.refresh()
+            # pbar_queue.update(1)
+            # pbar_queue.refresh()
             
             # end as leaf
             # if depth >= max_depth or len(indices) <= 1:  
@@ -93,25 +96,34 @@ class LevenshteinIndex(IndexTemplate):
             for _ in range(max_attempts):
                 # Choose s1 and s2
                 s1_idx, s2_idx = np.random.choice(indices, 2, replace=False)
-                if strings[s1_idx] == strings[s2_idx]:
+                s1, s2 = strings[s1_idx], strings[s2_idx]
+                if s1 == s2:
                     continue
 
                 # Compute Levenshtein distance
                 mask = np.empty(len(indices), dtype=bool)
-                
-                # progress bar for calculating Levenshtein distances
-                with tqdm(total=len(indices), position=tree_id*3+2, desc=f"Tree {tree_id} distances", leave=False) as pbar_dist:
-                    for j, idx in enumerate(indices):
-                        d1 = Levenshtein.distance(strings[idx], strings[s1_idx])
-                        d2 = Levenshtein.distance(strings[idx], strings[s2_idx])
-                        # d1 <= d2, go left, True
-                        mask[j] = d1 <= d2
-                        pbar_dist.update(1)
+
+                subset = strings[indices]
+                # Vectorized distance calculation (parallelized with all cores)
+                d1s = cdist([s1], subset, scorer=dist, dtype=np.int32, workers=-1)[0]
+                d2s = cdist([s2], subset, scorer=dist, dtype=np.int32, workers=-1)[0]
+
+                # Build the mask as before
+                mask = d1s <= d2s
+
+                # # progress bar for calculating Levenshtein distances
+                # # with tqdm(total=len(indices), position=tree_id*3+2, desc=f"Tree {tree_id} distances", leave=False) as pbar_dist:
+                # for j, idx in enumerate(indices):
+                #     d1 = dist(strings[idx], s1)
+                #     d2 = dist(strings[idx], s2)
+                #     # d1 <= d2, go left, True
+                #     mask[j] = d1 <= d2
+                #         # pbar_dist.update(1)
                 
                 # counting total dist calculations
-                distance_counter += len(indices)
-                pbar_total_dists.n = distance_counter
-                pbar_total_dists.refresh()
+                # distance_counter += len(indices)
+                # pbar_total_dists.n = distance_counter
+                # pbar_total_dists.refresh()
 
                 left_indices = indices[mask]
                 right_indices = indices[~mask]
@@ -147,8 +159,8 @@ class LevenshteinIndex(IndexTemplate):
         tree = [tree_s1, tree_s2, tree_left, tree_right, leaf_value]
         
         # close pbars
-        pbar_queue.close()
-        pbar_total_dists.close()
+        # pbar_queue.close()
+        # pbar_total_dists.close()
 
         return tree
     
@@ -164,8 +176,8 @@ class LevenshteinIndex(IndexTemplate):
             
             s1_idx = tree_s1[idx]
             s2_idx = tree_s2[idx]
-            d1 = Levenshtein.distance(query_str, data[s1_idx])
-            d2 = Levenshtein.distance(query_str, data[s2_idx])
+            d1 = dist(query_str, data[s1_idx])
+            d2 = dist(query_str, data[s2_idx])
 
             idx = tree_left[idx] if d1 <= d2 else tree_right[idx]
 
@@ -250,13 +262,13 @@ class LevenshteinIndex(IndexTemplate):
         return self._string_buffer[i]
     
     def get_distance(self, i: int, j: int) -> int:
-        # result = Levenshtein.distance(self._string_buffer[i], self._string_buffer[j], weights=self.weights, processor=self._decompose_korean)
-        result = Levenshtein.distance(self._string_buffer[i], self._string_buffer[j])
+        # result = dist(self._string_buffer[i], self._string_buffer[j], weights=self.weights, processor=self._decompose_korean)
+        result = dist(self._string_buffer[i], self._string_buffer[j])
         return result
 
     def get_distance_str(self, query_str: str, idx: int) -> int:
-            # result = Levenshtein.distance(query_str, self._string_buffer[idx], weights=self.weights, processor=self._decompose_korean)
-        result = Levenshtein.distance(query_str, self._string_buffer[idx])
+            # result = dist(query_str, self._string_buffer[idx], weights=self.weights, processor=self._decompose_korean)
+        result = dist(query_str, self._string_buffer[idx])
         return result
 
 
