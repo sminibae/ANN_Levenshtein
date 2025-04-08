@@ -9,7 +9,7 @@ from rapidfuzz.distance import Levenshtein
 from .Template import IndexTemplate
 
 from concurrent.futures import ThreadPoolExecutor
-from tqdm import tqdm
+# from tqdm import tqdm
 
 
 class LevenshteinIndex(IndexTemplate):
@@ -68,17 +68,17 @@ class LevenshteinIndex(IndexTemplate):
         max_attempts = 5
 
         # progress bar for queue
-        pbar_queue = tqdm(total=estimated_nodes, position=tree_id*3, desc=f"Tree {tree_id} queue", leave=False)
+        # pbar_queue = tqdm(total=estimated_nodes, position=tree_id*3, desc=f"Tree {tree_id} queue", leave=False)
         # progress bar for total calculations
-        distance_counter = 0
-        pbar_total_dists = tqdm(total=0, position=tree_id*3+1,  bar_format='{desc}: {n_fmt}', desc=f"Tree {tree_id} total dists", leave=False, unit_scale=True)
+        # distance_counter = 0
+        # pbar_total_dists = tqdm(total=0, position=tree_id*3+1,  bar_format='{desc}: {n_fmt}', desc=f"Tree {tree_id} total dists", leave=False, unit_scale=True)
 
         while queue:
             current_node_id, indices = queue.pop(0)
 
             # update pbar
-            pbar_queue.update(1)
-            pbar_queue.refresh()
+            # pbar_queue.update(1)
+            # pbar_queue.refresh()
             
             # end as leaf
             # if depth >= max_depth or len(indices) <= 1:  
@@ -100,18 +100,18 @@ class LevenshteinIndex(IndexTemplate):
                 mask = np.empty(len(indices), dtype=bool)
                 
                 # progress bar for calculating Levenshtein distances
-                with tqdm(total=len(indices), position=tree_id*3+2, desc=f"Tree {tree_id} distances", leave=False) as pbar_dist:
-                    for j, idx in enumerate(indices):
-                        d1 = Levenshtein.distance(strings[idx], strings[s1_idx])
-                        d2 = Levenshtein.distance(strings[idx], strings[s2_idx])
-                        # d1 <= d2, go left, True
-                        mask[j] = d1 <= d2
-                        pbar_dist.update(1)
+                # with tqdm(total=len(indices), position=tree_id*3+2, desc=f"Tree {tree_id} distances", leave=False) as pbar_dist:
+                for j, idx in enumerate(indices):
+                    d1 = Levenshtein.distance(strings[idx], strings[s1_idx])
+                    d2 = Levenshtein.distance(strings[idx], strings[s2_idx])
+                    # d1 <= d2, go left, True
+                    mask[j] = d1 <= d2
+                        # pbar_dist.update(1)
                 
                 # counting total dist calculations
-                distance_counter += len(indices)
-                pbar_total_dists.n = distance_counter
-                pbar_total_dists.refresh()
+                # distance_counter += len(indices)
+                # pbar_total_dists.n = distance_counter
+                # pbar_total_dists.refresh()
 
                 left_indices = indices[mask]
                 right_indices = indices[~mask]
@@ -147,8 +147,8 @@ class LevenshteinIndex(IndexTemplate):
         tree = [tree_s1, tree_s2, tree_left, tree_right, leaf_value]
         
         # close pbars
-        pbar_queue.close()
-        pbar_total_dists.close()
+        # pbar_queue.close()
+        # pbar_total_dists.close()
 
         return tree
     
