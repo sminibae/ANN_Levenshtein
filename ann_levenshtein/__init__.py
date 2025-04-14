@@ -1,2 +1,2 @@
 from .Template import NodeTemplate, TreeTemplate, IndexTemplate, ForestTemplate
-from .Levenshtein_ANN_v7_parallel_tree_building_wo_bottlenecks import LevenshteinIndex
+from .Levenshtein_ANN import LevenshteinIndex
