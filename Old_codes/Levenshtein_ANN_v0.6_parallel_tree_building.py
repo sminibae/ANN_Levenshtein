@@ -184,10 +184,10 @@ class LevenshteinIndex(IndexTemplate):
         self._string_buffer = None
         return True
     
-    def build(self):
-        for _ in range(self.num_trees):
-            tree = self._build_tree(self._string_buffer, np.arange(len(self._string_buffer)))
-            self.trees.append(tree)
+    # def build(self):
+    #     for _ in range(self.num_trees):
+    #         tree = self._build_tree(self._string_buffer, np.arange(len(self._string_buffer)))
+    #         self.trees.append(tree)
 
 
     def build(self):
