@@ -11,13 +11,12 @@ import random
 import unicodedata
 
 from rapidfuzz.distance import Levenshtein
-from .Template import IndexTemplate
 
 from concurrent.futures import ThreadPoolExecutor
 # from tqdm import tqdm
 
 
-class LevenshteinIndex(IndexTemplate):
+class LevenshteinIndex():
     def __init__(self, num_trees, n_jobs =-1):
         super().__init__(num_trees)
         # inputs
@@ -93,66 +92,66 @@ class LevenshteinIndex(IndexTemplate):
                 leaf_value[current_node_id] = indices[0]
                 continue
 
-            # main split method with max_attempts
-            successful_split = False
-            # for _ in range(max_attempts):
-            while successful_split is not True:
-                # Choose s1 and s2
-                s1_idx, s2_idx = np.random.choice(indices, 2, replace=False)
-                s1, s2 = strings[s1_idx], strings[s2_idx]
-                if s1 == s2:
-                    continue
-
-                # Compute Levenshtein distance
-                mask_ppp = np.full(len(indices), False, dtype=bool)
-                mask_ppm = np.full(len(indices), False, dtype=bool)
-                mask_pmp = np.full(len(indices), False, dtype=bool)
-                mask_pmm = np.full(len(indices), False, dtype=bool)
-                mask_mpp = np.full(len(indices), False, dtype=bool)
-                mask_mpm = np.full(len(indices), False, dtype=bool)
-                mask_mmp = np.full(len(indices), False, dtype=bool)
-                mask_mmm = np.full(len(indices), False, dtype=bool)
+            # # main split method with max_attempts
+            # successful_split = False
+            # # for _ in range(max_attempts):
+            # while successful_split is not True:
                 
-                for j, idx in enumerate(indices):
-                    each_string = strings[idx]
-                    (a1, a2, a3) = self.Levenshtein_dist_vector(each_string, s1)
-                    (b1, b2, b3) = self.Levenshtein_dist_vector(each_string, s2)
-                    # split into 8 parts
-                    if a1>=b1 and a2>=b2 and a3>=b3:  # +++
-                        mask_ppp[j] = True  # go tree_ppp
-                    elif a1>=b1 and a2>=b2 and a3<b3:  # ++-
-                        mask_ppm[j] = True  # go tree_ppm
-                    elif a1>=b1 and a2<b2 and a3>=b3:  # +-+
-                        mask_pmp[j] = True  # go tree_pmp
-                    elif a1>=b1 and a2<b2 and a3<b3:  # +--
-                        mask_pmm[j] = True  # go tree_pmm
-                    elif a1<b1 and a2>=b2 and a3>=b3:  # -++
-                        mask_mpp[j] = True  # go tree_mpp
-                    elif a1<b1 and a2>=b2 and a3<b3:  # -+-
-                        mask_mpm[j] = True  # go tree_mpm
-                    elif a1<b1 and a2<b2 and a3>=b3:  # --+
-                        mask_mmp[j] = True  # go tree_mmp
-                    else:  # ---
-                        mask_mmm[j] = True  # go tree_mmm
-        
+            # Choose s1 and s2
+            s1_idx, s2_idx = np.random.choice(indices, 2, replace=False)
+            s1, s2 = strings[s1_idx], strings[s2_idx]
+            if s1 == s2:
+                continue
 
-                indices_ppp = indices[mask_ppp]
-                indices_ppm = indices[mask_ppm]
-                indices_pmp = indices[mask_pmp]
-                indices_pmm = indices[mask_pmm]
-                indices_mpp = indices[mask_mpp]
-                indices_mpm = indices[mask_mpm]
-                indices_mmp = indices[mask_mmp]
-                indices_mmm = indices[mask_mmm]
+            # Compute Levenshtein distance
+            mask_ppp = np.full(len(indices), False, dtype=bool)
+            mask_ppm = np.full(len(indices), False, dtype=bool)
+            mask_pmp = np.full(len(indices), False, dtype=bool)
+            mask_pmm = np.full(len(indices), False, dtype=bool)
+            mask_mpp = np.full(len(indices), False, dtype=bool)
+            mask_mpm = np.full(len(indices), False, dtype=bool)
+            mask_mmp = np.full(len(indices), False, dtype=bool)
+            mask_mmm = np.full(len(indices), False, dtype=bool)
+            
+            for j, idx in enumerate(indices):
+                each_string = strings[idx]
+                (a1, a2, a3) = self.Levenshtein_dist_vector(each_string, s1)
+                (b1, b2, b3) = self.Levenshtein_dist_vector(each_string, s2)
+                # split into 8 parts
+                if a1>=b1 and a2>=b2 and a3>=b3:  # +++
+                    mask_ppp[j] = True  # go tree_ppp
+                elif a1>=b1 and a2>=b2 and a3<b3:  # ++-
+                    mask_ppm[j] = True  # go tree_ppm
+                elif a1>=b1 and a2<b2 and a3>=b3:  # +-+
+                    mask_pmp[j] = True  # go tree_pmp
+                elif a1>=b1 and a2<b2 and a3<b3:  # +--
+                    mask_pmm[j] = True  # go tree_pmm
+                elif a1<b1 and a2>=b2 and a3>=b3:  # -++
+                    mask_mpp[j] = True  # go tree_mpp
+                elif a1<b1 and a2>=b2 and a3<b3:  # -+-
+                    mask_mpm[j] = True  # go tree_mpm
+                elif a1<b1 and a2<b2 and a3>=b3:  # --+
+                    mask_mmp[j] = True  # go tree_mmp
+                else:  # ---
+                    mask_mmm[j] = True  # go tree_mmm
+    
+            indices_ppp = indices[mask_ppp]
+            indices_ppm = indices[mask_ppm]
+            indices_pmp = indices[mask_pmp]
+            indices_pmm = indices[mask_pmm]
+            indices_mpp = indices[mask_mpp]
+            indices_mpm = indices[mask_mpm]
+            indices_mmp = indices[mask_mmp]
+            indices_mmm = indices[mask_mmm]
 
-                # at least 2 non-empty indices should exist
-                partitions = [
-                    indices_ppp, indices_ppm, indices_pmp, indices_pmm,
-                    indices_mpp, indices_mpm, indices_mmp, indices_mmm
-                ]
-                if sum(len(p) > 0 for p in partitions) >= 2:
-                    successful_split = True
-                    break  # found a good split
+                # # at least 2 non-empty indices should exist
+                # partitions = [
+                #     indices_ppp, indices_ppm, indices_pmp, indices_pmm,
+                #     indices_mpp, indices_mpm, indices_mmp, indices_mmm
+                # ]
+                # if sum(len(p) > 0 for p in partitions) >= 2:
+                #     successful_split = True
+                #     break  # found a good split
 
             # Assign s1, s2 idx
             tree_s1[current_node_id] = s1_idx
