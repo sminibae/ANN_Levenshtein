@@ -6,7 +6,7 @@ import random
 import unicodedata
 
 from rapidfuzz.distance import Levenshtein
-from .Template import IndexTemplate
+from ..ann_levenshtein.Template import IndexTemplate
 
 from joblib import Parallel, delayed
 

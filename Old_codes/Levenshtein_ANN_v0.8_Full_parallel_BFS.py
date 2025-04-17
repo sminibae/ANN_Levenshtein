@@ -6,7 +6,7 @@ import random
 import unicodedata
 
 from rapidfuzz.distance import Levenshtein
-from .Template import IndexTemplate
+from Template import IndexTemplate
 
 import multiprocessing
 from multiprocessing import Pool, Array, Value, Lock, Manager

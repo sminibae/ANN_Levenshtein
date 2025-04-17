@@ -6,7 +6,7 @@ import random
 import unicodedata
 
 from rapidfuzz.distance import Levenshtein
-from .Template import IndexTemplate
+from ..ann_levenshtein.Template import IndexTemplate
 
 from concurrent.futures import ThreadPoolExecutor
 # from tqdm import tqdm

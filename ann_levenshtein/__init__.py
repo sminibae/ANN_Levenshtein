@@ -1,1 +1,2 @@
 from .Levenshtein_ANN_v1_8split import LevenshteinIndex
+from .Template import IndexTemplate

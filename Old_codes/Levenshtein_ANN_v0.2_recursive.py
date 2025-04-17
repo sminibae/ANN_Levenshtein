@@ -9,7 +9,7 @@ import joblib
 import unicodedata
 
 from rapidfuzz.distance import Levenshtein
-from .Template import IndexTemplate
+from ..ann_levenshtein.Template import IndexTemplate
 
 
 # class LevenshteinNode(NodeTemplate):

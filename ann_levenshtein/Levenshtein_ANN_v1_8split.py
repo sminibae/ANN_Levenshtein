@@ -11,12 +11,13 @@ import random
 import unicodedata
 
 from rapidfuzz.distance import Levenshtein
+from .Template import IndexTemplate
 
 from concurrent.futures import ThreadPoolExecutor
 # from tqdm import tqdm
 
 
-class LevenshteinIndex():
+class LevenshteinIndex(IndexTemplate):
     def __init__(self, num_trees, n_jobs =-1):
         super().__init__(num_trees)
         # inputs
@@ -343,9 +344,18 @@ class LevenshteinIndex():
         for i, tree in enumerate(self.trees):
             arrays[f'tree_{i}_s1'] = tree[0]
             arrays[f'tree_{i}_s2'] = tree[1]
-            arrays[f'tree_{i}_left'] = tree[2]
-            arrays[f'tree_{i}_right'] = tree[3]
-            arrays[f'tree_{i}_leaf'] = tree[4]
+
+            arrays[f'tree_{i}_ppp'] = tree[2]
+            arrays[f'tree_{i}_ppm'] = tree[3]
+            arrays[f'tree_{i}_pmp'] = tree[4]
+            arrays[f'tree_{i}_pmm'] = tree[5]
+            
+            arrays[f'tree_{i}_mpp'] = tree[6]
+            arrays[f'tree_{i}_mpm'] = tree[7]
+            arrays[f'tree_{i}_mmp'] = tree[8]
+            arrays[f'tree_{i}_mmm'] = tree[9]
+
+            arrays[f'tree_{i}_leaf'] = tree[10]
 
         np.savez_compressed(filename, **arrays)
 
@@ -358,8 +368,17 @@ class LevenshteinIndex():
             tree = [
                 data[f'tree_{i}_s1'],
                 data[f'tree_{i}_s2'],
-                data[f'tree_{i}_left'],
-                data[f'tree_{i}_right'],
+
+                data[f'tree_{i}_ppp'],
+                data[f'tree_{i}_ppm'],
+                data[f'tree_{i}_pmp'],
+                data[f'tree_{i}_pmm'],
+
+                data[f'tree_{i}_mpp'],
+                data[f'tree_{i}_mpm'],
+                data[f'tree_{i}_mmp'],
+                data[f'tree_{i}_mmm'],
+                
                 data[f'tree_{i}_leaf']
             ]
             self.trees.append(tree)
